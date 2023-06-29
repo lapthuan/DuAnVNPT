@@ -2,6 +2,7 @@
 Thao Tách
 
 Cài thư viện 
+
   °  pip install selenium
   
   °  pip install pyinstaller
