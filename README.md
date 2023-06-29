@@ -2,8 +2,8 @@
 Thao Tách
 
 Cài thư viện 
-- pip install selenium
-- pip install pyinstaller
+    pip install selenium
+    pip install pyinstaller
 Customs
 - Mở dòng options.add_argument('--headless') sẽ ẩn trình duyệt khi thực hiện
 - Đổi Link trang web
