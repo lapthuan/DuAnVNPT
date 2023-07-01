@@ -6,6 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
+import openpyxl
+from openpyxl.styles import Alignment, Font
 from dotenv import load_dotenv
 from pathlib import Path
 import telebot
@@ -135,7 +137,40 @@ def login_command(message):
         with open('du_lieu.txt', 'a', encoding='utf-8') as file:
             file.write(formatted_data + "\n")
 
-       
+           # Đường dẫn tới file văn bản
+        path_to_txt = 'du_lieu.txt'
+
+        # Tạo một workbook mới
+        workbook = openpyxl.Workbook()
+
+        # Chọn sheet đầu tiên
+        sheet = workbook.active
+
+        # Đọc dữ liệu từ file văn bản và ghi vào sheet
+        with open(path_to_txt, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+        for row, line in enumerate(lines, start=2):
+            # Tách các giá trị trong dòng văn bản
+            values = line.strip().split(',')
+
+            # Ghi dữ liệu vào các cột tùy chỉnh
+            for col, value in enumerate(values, start=1):
+                sheet.cell(row=row, column=col, value=value)
+
+        # Tùy chỉnh tiêu đề "Bảng Thống Kê"
+        title_cell = sheet['A1']
+        title_cell.value = 'Bảng Thống Kê'
+        title_cell.font = Font(size=13)
+        title_cell.alignment = Alignment(horizontal='center')
+        sheet.merge_cells('A1:D1')
+
+
+        # Lưu workbook thành file Excel
+        desktop_path = os.path.expanduser("~/Desktop")
+        file_name = "du_lieu.xlsx"
+        path_to_excel = os.path.join(desktop_path, file_name)
+        workbook.save(path_to_excel)
+        
  
 
 
