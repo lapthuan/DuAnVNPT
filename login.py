@@ -40,9 +40,6 @@ def login(username,user):
         dangnhap = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div/form/table/tbody/tr[6]/td/input')
         dangnhap.click()
 
-        # Đánh dấu đã đăng nhập thành công
-        is_logged_in = True
-
         # Đợi một thời gian để đảm bảo đăng nhập thành công
         select = driver.find_element(By.CSS_SELECTOR, "span.title")
         hover = ActionChains(driver).move_to_element(select)
