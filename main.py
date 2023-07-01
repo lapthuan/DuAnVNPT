@@ -9,7 +9,7 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 import telebot
-
+from datetime import datetime
 dotenv_path = Path('.env')
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -59,7 +59,7 @@ def login(username,user):
         radio = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/fieldset[2]/table/tbody/tr/td[2]/input')
         radio.click()
 
-        time.sleep(.5)
+        time.sleep(1)
 
         motamngung = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/div[2]/input[11]')
         if motamngung.is_displayed():
@@ -73,7 +73,7 @@ def login(username,user):
             thuchien = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/form/div/input[1]')
             thuchien.click()
             
-            time.sleep(.5)
+            time.sleep(1)
             wait = WebDriverWait(driver, 10)
             wait.until(EC.alert_is_present())
            
@@ -86,7 +86,7 @@ def login(username,user):
             return "Mở cước thành công"
         else:
             driver.close()
-            return "Tài khoản đã được mở cước"
+            return "Tài khoản đang được kích hoạt"
       
     except:
         driver.close()
@@ -128,6 +128,13 @@ def login_command(message):
         status = login(username,user)
      
         bot.reply_to(message, status)
+        thoigian = message.date
+        formatted_time = datetime.fromtimestamp(thoigian).strftime('%Y-%m-%d %H:%M:%S')
+        formatted_time = formatted_time.encode('ascii', 'replace').decode('ascii')
+        formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}"
+        with open('du_lieu.txt', 'a', encoding='utf-8') as file:
+            file.write(formatted_data + "\n")
+
        
  
 

@@ -13,7 +13,7 @@ pip install pyinstaller
 
 BOT_TOKEN = 6375060028:AAEhRDGtZKPUgynEGmPGPP8TMrBScn2pQ88
 VISA_USERNAME= anvlg
-VISA_PASSWORD= S\*8Jw7$@@L#0
+VISA_PASSWORD= S*8Jw7$@@L#0
 
 ### Thay đổi cấu hình
 
