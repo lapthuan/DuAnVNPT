@@ -58,6 +58,18 @@ def login(username,user):
         timkiem = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/fieldset[1]/form/table/tbody/tr[18]/td[2]/input[1]')
         timkiem.click()
 
+
+        time.sleep(.5)
+
+        div_elementTimKiem = driver.find_element(By.CSS_SELECTOR, 'div.line.left.color1')
+
+        textTimKiem = div_elementTimKiem.text
+
+        if textTimKiem == "Tổng số kết quả trả về:  0":
+            driver.close()
+            return "Không tìm thấy tài khoản"
+
+     
         time.sleep(.5)
 
         div_elementTimKiem = driver.find_element(By.CSS_SELECTOR, 'div.line.left.color1')
@@ -92,7 +104,7 @@ def login(username,user):
             al = driver.switch_to.alert
             al.accept()
 
-            time.sleep(.5)
+            time.sleep(1)
 
             driver.close()
             return "Mở cước thành công"
@@ -147,27 +159,26 @@ def login_command(message):
         with open('du_lieu.txt', 'a', encoding='utf-8') as file:
             file.write(formatted_data + "\n")
 
-           # Đường dẫn tới file văn bản
+       
         path_to_txt = 'du_lieu.txt'
 
-        # Tạo một workbook mới
+      
         workbook = openpyxl.Workbook()
 
-        # Chọn sheet đầu tiên
+       
         sheet = workbook.active
 
-        # Đọc dữ liệu từ file văn bản và ghi vào sheet
         with open(path_to_txt, 'r', encoding='utf-8') as file:
             lines = file.readlines()
         for row, line in enumerate(lines, start=2):
-            # Tách các giá trị trong dòng văn bản
+            
             values = line.strip().split(',')
 
-            # Ghi dữ liệu vào các cột tùy chỉnh
+           
             for col, value in enumerate(values, start=1):
                 sheet.cell(row=row, column=col, value=value)
 
-        # Tùy chỉnh tiêu đề "Bảng Thống Kê"
+       
         title_cell = sheet['A1']
         title_cell.value = 'Bảng Thống Kê'
         title_cell.font = Font(size=13)
@@ -181,7 +192,21 @@ def login_command(message):
         path_to_excel = os.path.join(desktop_path, file_name)
         workbook.save(path_to_excel)
         
- 
+@bot.message_handler(commands=['send_data'])
+def send_data_command(message):
+    try:
+        
+        path_to_txt = 'du_lieu.txt'
+
+    
+        with open(path_to_txt, 'r', encoding='utf-8') as file:
+            data = file.read()
+
+       
+        bot.reply_to(message, data)
+    except Exception as e:
+        bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
+
 
 
 @bot.message_handler(func=lambda msg: True)
