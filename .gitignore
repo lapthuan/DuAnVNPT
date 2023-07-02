@@ -1,2 +1,4 @@
 .env
 du_lieu.txt
+venv
+nohup.out
