@@ -8,6 +8,7 @@ import time
 import os
 import openpyxl
 from openpyxl.styles import Alignment, Font
+from openpyxl.utils import get_column_letter
 from dotenv import load_dotenv
 from pathlib import Path
 import telebot
@@ -144,21 +145,46 @@ def login_command(message):
 
             with open(path_to_txt, 'r', encoding='utf-8') as file:
                 lines = file.readlines()
-            for row, line in enumerate(lines, start=2):
-                
+            for row, line in enumerate(lines, start=3):             
                 values = line.strip().split(',')
-
-            
                 for col, value in enumerate(values, start=1):
                     sheet.cell(row=row, column=col, value=value)
+                    column_letter = get_column_letter(col)
+                    sheet.column_dimensions[column_letter].auto_size = True
 
         
             title_cell = sheet['A1']
+            title_NTT = sheet['A2']
+            title_TK = sheet['B2']
+            title_TG = sheet['C2']
+            title_PH = sheet['D2']
+            title_GP = sheet['E2']
+            
+            title_NTT.value = 'Người Thực Hiện'
+            title_TK.value = 'Tài Khoản Mở Cước'
+            title_TG.value = 'Thời Gian'
+            title_PH.value = 'Phản Hồi'
+            title_GP.value = 'Nơi Gửi'
+
+            font = Font(bold=True)
+            alignment = Alignment(horizontal='center')
+
+            title_NTT.font = font
+            title_TK.font = font
+            title_TG.font = font
+            title_PH.font = font
+            title_GP.font = font
+
+            title_NTT.alignment = alignment
+            title_TK.alignment = alignment
+            title_TG.alignment = alignment
+            title_PH.alignment = alignment
+            title_GP.alignment = alignment
+
             title_cell.value = 'Bảng Thống Kê'
-            title_cell.font = Font(size=13)
+            title_cell.font = Font(size=13, bold=True)
             title_cell.alignment = Alignment(horizontal='center')
             sheet.merge_cells('A1:E1')
-
 
             # Lưu workbook thành file Excel
             desktop_path = os.path.expanduser("~/Desktop")
@@ -168,21 +194,35 @@ def login_command(message):
     except:
         bot.reply_to(message, f"Đã xảy ra lỗi trong thực thi log")
         
+
+
+        
 @bot.message_handler(commands=['send_data'])
 def send_data_command(message):
     try:
-        
         path_to_txt = 'du_lieu.txt'
+        path_to_excel = 'du_lieu.xlsx'
+
+      
+        with open(path_to_txt, 'r', encoding='utf-8') as file:
+            data = file.readlines()
 
     
-        with open(path_to_txt, 'r', encoding='utf-8') as file:
-            data = file.read()
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+
+        for row_num, row_data in enumerate(data, start=1):
+            sheet.cell(row=row_num, column=1, value=row_data.strip())
 
        
-        bot.reply_to(message, data)
+        workbook.save(path_to_excel)
+
+       
+        with open(path_to_excel, 'rb') as file:
+            bot.send_document(message.chat.id, file)
+
     except Exception as e:
         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
-
 
 
 @bot.message_handler(func=lambda msg: True)
