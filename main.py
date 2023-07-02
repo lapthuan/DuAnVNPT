@@ -69,16 +69,7 @@ def login(username,user):
             driver.close()
             return "Không tìm thấy tài khoản"
 
-     
         time.sleep(.5)
-
-        div_elementTimKiem = driver.find_element(By.CSS_SELECTOR, 'div.line.left.color1')
-
-        textTimKiem = div_elementTimKiem.text
-
-        if textTimKiem == "Tổng số kết quả trả về:  0":
-            driver.close()
-            return "Không tìm thấy tài khoản"
 
         radio = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/fieldset[2]/table/tbody/tr/td[2]/input')
         radio.click()
@@ -116,81 +107,66 @@ def login(username,user):
         driver.close()
         return "Lỗi"
       
-        
-
-   
-    
-  
-    
-# @bot.message_handler(commands=['start', 'hello'])
-# def send_welcome(message):
-#     bot.reply_to(message, "Ok đây là phản hồi")
-
-# @bot.message_handler(commands=['username'])
-# def set_username(message):
-#     global username
-#     username = message.text.replace('/username', '').strip()
-#     bot.reply_to(message, f"Tài khoản đã được cập nhật: {username}")
-
-# @bot.message_handler(commands=['password'])
-# def set_password(message):
-#     global password
-#     password = message.text.replace('/password', '').strip()
-#     bot.reply_to(message, "Mật khẩu đã được cập nhật!")
 
 @bot.message_handler(commands=['mc'])
 def login_command(message):
-    
-    username = message.text.replace('/mc', '').strip()
-    bot.reply_to(message, f"Đang thực hiện mở khóa tài khoản: {username}")
-    user = message.from_user.full_name
-
-    # print(username)
-    # Kiểm tra xem đã đăng nhập hay chưa
-    
-    if USERNAME and PASSWORD:
-        status = login(username,user)
-     
-        bot.reply_to(message, status)
+    try:
+        username = message.text.replace('/mc', '').strip()
+        bot.reply_to(message, f"Đang thực hiện mở khóa tài khoản: {username}")
+        user = message.from_user.full_name
         thoigian = message.date
-        formatted_time = datetime.fromtimestamp(thoigian).strftime('%Y-%m-%d %H:%M:%S')
-        formatted_time = formatted_time.encode('ascii', 'replace').decode('ascii')
-        formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}"
-        with open('du_lieu.txt', 'a', encoding='utf-8') as file:
-            file.write(formatted_data + "\n")
-
+        # print(username)
        
-        path_to_txt = 'du_lieu.txt'
+        if USERNAME and PASSWORD:
+            status = login(username,user)
 
-      
-        workbook = openpyxl.Workbook()
+            bot.reply_to(message, status)
 
-       
-        sheet = workbook.active
-
-        with open(path_to_txt, 'r', encoding='utf-8') as file:
-            lines = file.readlines()
-        for row, line in enumerate(lines, start=2):
             
-            values = line.strip().split(',')
+            formatted_time = datetime.fromtimestamp(thoigian).strftime('%Y-%m-%d %H:%M:%S')
+            formatted_time = formatted_time.encode('ascii', 'replace').decode('ascii')
+            if message.chat.type == 'group' or message.chat.type == 'supergroup':
+                group_name = message.chat.title
+                formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}, Group: {group_name}"
+            else:
+                formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}, Bot" 
+            with open('du_lieu.txt', 'a', encoding='utf-8') as file:
+                file.write(formatted_data + "\n")
 
-           
-            for col, value in enumerate(values, start=1):
-                sheet.cell(row=row, column=col, value=value)
+        
+            path_to_txt = 'du_lieu.txt'
 
-       
-        title_cell = sheet['A1']
-        title_cell.value = 'Bảng Thống Kê'
-        title_cell.font = Font(size=13)
-        title_cell.alignment = Alignment(horizontal='center')
-        sheet.merge_cells('A1:D1')
+        
+            workbook = openpyxl.Workbook()
+
+        
+            sheet = workbook.active
+
+            with open(path_to_txt, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+            for row, line in enumerate(lines, start=2):
+                
+                values = line.strip().split(',')
+
+            
+                for col, value in enumerate(values, start=1):
+                    sheet.cell(row=row, column=col, value=value)
+
+        
+            title_cell = sheet['A1']
+            title_cell.value = 'Bảng Thống Kê'
+            title_cell.font = Font(size=13)
+            title_cell.alignment = Alignment(horizontal='center')
+            sheet.merge_cells('A1:E1')
 
 
-        # Lưu workbook thành file Excel
-        desktop_path = os.path.expanduser("~/Desktop")
-        file_name = "du_lieu.xlsx"
-        path_to_excel = os.path.join(desktop_path, file_name)
-        workbook.save(path_to_excel)
+            # Lưu workbook thành file Excel
+            desktop_path = os.path.expanduser("~/Desktop")
+            file_name = "du_lieu.xlsx"
+            path_to_excel = os.path.join(desktop_path, file_name)
+            workbook.save(path_to_excel)
+    except:
+        bot.reply_to(message, f"Đã xảy ra lỗi trong thực thi log")
         
 @bot.message_handler(commands=['send_data'])
 def send_data_command(message):
