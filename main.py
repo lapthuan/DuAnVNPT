@@ -196,8 +196,8 @@ def login_command(message):
         
 
 
-        
-@bot.message_handler(commands=['send_data'])
+
+@bot.message_handler(commands=['dulieu'])
 def send_data_command(message):
     try:
         path_to_txt = 'du_lieu.txt'
