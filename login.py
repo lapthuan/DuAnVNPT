@@ -4,13 +4,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
 from dotenv import load_dotenv
 from pathlib import Path
 import telebot
 
-dotenv_path = Path('D:\\vnpt\\DuAnVNPT\\.env')
+dotenv_path = Path('.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 
@@ -23,7 +24,7 @@ options = webdriver.ChromeOptions()
 options.add_argument('--headless')
 options.add_experimental_option("detach", True)
 # Biến kiểm tra đã đăng nhập hay chưa
-
+driver = webdriver.Chrome(ChromeDriverManager().install())
 
 def login(username,user):
     
