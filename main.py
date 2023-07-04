@@ -146,11 +146,13 @@ def login_command(message):
         
             path_to_txt = 'du_lieu.txt'
 
-        
+            
             workbook = openpyxl.Workbook()
 
         
             sheet = workbook.active
+
+            print('open du_lieu.txt')
 
             with open(path_to_txt, 'r', encoding='utf-8') as file:
                 lines = file.readlines()
@@ -196,10 +198,11 @@ def login_command(message):
             sheet.merge_cells('A1:E1')
 
             # Lưu workbook thành file Excel
-            desktop_path = os.path.expanduser("~/Desktop")
+            logFilePath = os.path.expanduser("/home/hostvlg/DuAnVNPT")
             file_name = "du_lieu.xlsx"
-            path_to_excel = os.path.join(desktop_path, file_name)
+            path_to_excel = os.path.join(logFilePath, file_name)
             workbook.save(path_to_excel)
+            print('save log ok')
     except:
         bot.reply_to(message, f"Đã xảy ra lỗi trong thực thi log")
         

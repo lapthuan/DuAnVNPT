@@ -38,3 +38,15 @@ Trước khi thực hiện, bạn có thể tùy chỉnh các thông số sau:
 - Để thay đổi XPath của nút đăng nhập, làm tương tự như trên và thay thế giá trị của biến `xpath_button_login`.
 
 Chú ý: Đảm bảo rằng bạn đã cài đặt đúng các thư viện và đã thực hiện các thay đổi cần thiết trước khi chạy mã.
+
+/etc/supervisor/conf.d/auto_visa_conf.conf
+[program:auto_visa]
+command=/home/hostvlg/DuAnVNPT/venv/bin/python -u main.py
+directory=/home/hostvlg/DuAnVNPT
+stdout_logfile=/home/hostvlg/DuAnVNPT/auto_visa_output.txt
+redirect_stderr=true
+
+sudo supervisorctl
+reread
+add auto_visa
+status
