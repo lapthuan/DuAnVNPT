@@ -102,7 +102,7 @@ def login(username,user):
             return "Mở cước thành công"
         else:
             driver.close()
-            return "Tài khoản đang được kích hoạt"
+            return "Tài khoản đã được kích hoạt, không thực hiện mở cước"
       
     except:
         driver.close()
@@ -128,9 +128,9 @@ def login_command(message):
             formatted_time = formatted_time.encode('ascii', 'replace').decode('ascii')
             if message.chat.type == 'group' or message.chat.type == 'supergroup':
                 group_name = message.chat.title
-                formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}, Group: {group_name}"
+                formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}, Nhóm: {group_name}"
             else:
-                formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}, Bot" 
+                formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}, Chat trực tiếp với Bot" 
             with open('du_lieu.txt', 'a', encoding='utf-8') as file:
                 file.write(formatted_data + "\n")
 
@@ -164,7 +164,7 @@ def login_command(message):
             title_TK.value = 'Tài Khoản Mở Cước'
             title_TG.value = 'Thời Gian'
             title_PH.value = 'Phản Hồi'
-            title_GP.value = 'Nơi Gửi'
+            title_GP.value = 'Nơi gửi'
 
             font = Font(bold=True)
             alignment = Alignment(horizontal='center')
@@ -192,7 +192,7 @@ def login_command(message):
             path_to_excel = os.path.join(desktop_path, file_name)
             workbook.save(path_to_excel)
     except:
-        bot.reply_to(message, f"Đã xảy ra lỗi trong thực thi log")
+        bot.reply_to(message, f"Đã xảy ra lỗi khi ghi dữ liệu vào log")
         
 
 
