@@ -1,5 +1,4 @@
 .env
-du_lieu.txt
 venv
 nohup.out
 auto_visa_output.txt
