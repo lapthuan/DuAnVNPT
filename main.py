@@ -4,8 +4,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
 import openpyxl
@@ -26,19 +24,15 @@ bot = telebot.TeleBot(BOT_TOKEN)
 options = webdriver.ChromeOptions()
 
 options.add_argument('--headless')
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
-# options.add_experimental_option("detach", True)
+options.add_experimental_option("detach", True)
 # Biến kiểm tra đã đăng nhập hay chưa
 
 
 def login(username,user):
+    
     try:
-        print('try unlock')
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        print('driver ok')
+        driver = webdriver.Chrome(options=options)
         driver.get('http://10.156.7.25/visa/login.vnpt')
-        print('get visa fe ok')
 
         taikhoan = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div/form/table/tbody/tr[3]/td/input')
         taikhoan.send_keys(USERNAME)
@@ -53,7 +47,6 @@ def login(username,user):
         select = driver.find_element(By.CSS_SELECTOR, "span.title")
         hover = ActionChains(driver).move_to_element(select)
         hover.perform()
-        print('hover ok')
 
         time.sleep(.5)
 
@@ -106,8 +99,69 @@ def login(username,user):
             time.sleep(1)
 
             driver.close()
-            print('unlock ok ok')
             return "Mở cước thành công"
+        else:
+            driver.close()
+            return "Tài khoản đã được kích hoạt. Không thực hiện mở cước"
+      
+    except:
+        driver.close()
+        return "Lỗi"
+
+
+def check_account_status(username,user):
+    
+    try:
+        driver = webdriver.Chrome(options=options)
+        driver.get('http://10.156.7.25/visa/login.vnpt')
+
+        taikhoan = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div/form/table/tbody/tr[3]/td/input')
+        taikhoan.send_keys(USERNAME)
+
+        matkhau = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div/form/table/tbody/tr[5]/td/input')
+        matkhau.send_keys(PASSWORD)
+
+        dangnhap = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div/form/table/tbody/tr[6]/td/input')
+        dangnhap.click()
+
+   
+        select = driver.find_element(By.CSS_SELECTOR, "span.title")
+        hover = ActionChains(driver).move_to_element(select)
+        hover.perform()
+
+        time.sleep(.5)
+
+        tracuu = driver.find_element("xpath", '/html/body/div[1]/div[2]/header/div[1]/nav/ul/li[1]/ul/li[1]/a')
+        tracuu.click()
+        
+        uservisa = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/fieldset/form/table/tbody/tr[10]/td[2]/input')
+        uservisa.send_keys(username)
+        
+        timkiem = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/fieldset[1]/form/table/tbody/tr[18]/td[2]/input[1]')
+        timkiem.click()
+
+
+        time.sleep(.5)
+
+        div_elementTimKiem = driver.find_element(By.CSS_SELECTOR, 'div.line.left.color1')
+
+        textTimKiem = div_elementTimKiem.text
+
+        if textTimKiem == "Tổng số kết quả trả về:  0":
+            driver.close()
+            return "Không tìm thấy tài khoản"
+
+        time.sleep(.5)
+
+        radio = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/fieldset[2]/table/tbody/tr/td[2]/input')
+        radio.click()
+
+        time.sleep(1)
+
+        motamngung = driver.find_element("xpath", '/html/body/div[1]/table/tbody/tr/td[2]/div/div[2]/input[11]')
+        if motamngung.is_displayed():
+            driver.close()
+            return "Tài khoản chưa được kích hoạt, có thể mở cước"
         else:
             driver.close()
             return "Tài khoản đã được kích hoạt, không thực hiện mở cước"
@@ -115,11 +169,9 @@ def login(username,user):
     except:
         driver.close()
         return "Lỗi"
-      
 
 @bot.message_handler(commands=['mc'])
 def login_command(message):
-    print('login_command')
     try:
         username = message.text.replace('/mc', '').strip()
         bot.reply_to(message, f"Đang thực hiện mở khóa tài khoản: {username}")
@@ -137,22 +189,20 @@ def login_command(message):
             formatted_time = formatted_time.encode('ascii', 'replace').decode('ascii')
             if message.chat.type == 'group' or message.chat.type == 'supergroup':
                 group_name = message.chat.title
-                formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}, Nhóm: {group_name}"
+                formatted_data = f"{user}, {username}, {formatted_time}, {status},Group: {group_name}"
             else:
-                formatted_data = f"Người thực hiện: {user}, Tài khoản mở cước: {username} , Thời gian: {formatted_time}, Phản hồi: {status}, Chat trực tiếp với Bot" 
+                formatted_data = f"{user}, {username} , {formatted_time}, {status},Chat trực tiếp với Bot" 
             with open('du_lieu.txt', 'a', encoding='utf-8') as file:
                 file.write(formatted_data + "\n")
 
         
             path_to_txt = 'du_lieu.txt'
 
-            
+        
             workbook = openpyxl.Workbook()
 
         
             sheet = workbook.active
-
-            print('open du_lieu.txt')
 
             with open(path_to_txt, 'r', encoding='utf-8') as file:
                 lines = file.readlines()
@@ -198,11 +248,10 @@ def login_command(message):
             sheet.merge_cells('A1:E1')
 
             # Lưu workbook thành file Excel
-            logFilePath = os.path.expanduser("/home/hostvlg/DuAnVNPT")
+            desktop_path = os.path.expanduser("./")
             file_name = "du_lieu.xlsx"
-            path_to_excel = os.path.join(logFilePath, file_name)
+            path_to_excel = os.path.join(desktop_path, file_name)
             workbook.save(path_to_excel)
-            print('save log ok')
     except:
         bot.reply_to(message, f"Đã xảy ra lỗi khi ghi dữ liệu vào log")
         
@@ -212,23 +261,7 @@ def login_command(message):
 @bot.message_handler(commands=['dulieu'])
 def send_data_command(message):
     try:
-        path_to_txt = 'du_lieu.txt'
         path_to_excel = 'du_lieu.xlsx'
-
-      
-        with open(path_to_txt, 'r', encoding='utf-8') as file:
-            data = file.readlines()
-
-    
-        workbook = openpyxl.Workbook()
-        sheet = workbook.active
-
-        for row_num, row_data in enumerate(data, start=1):
-            sheet.cell(row=row_num, column=1, value=row_data.strip())
-
-       
-        workbook.save(path_to_excel)
-
        
         with open(path_to_excel, 'rb') as file:
             bot.send_document(message.chat.id, file)
@@ -237,8 +270,19 @@ def send_data_command(message):
         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
 
 
-@bot.message_handler(func=lambda msg: True)
-def echo_all(message):
-    bot.reply_to(message, message.text)
-
+@bot.message_handler(commands=['kt'])
+def check_account_command(message):
+    try:
+        username = message.text.replace('/kt', '').strip()
+        bot.reply_to(message, f"Đang thực hiện kiểm tra tài khoản: {username}")
+        user = message.from_user.full_name
+        thoigian = message.date
+        # print(username)
+       
+        if USERNAME and PASSWORD:
+            status = check_account_status(username,user)
+            bot.reply_to(message, status)
+    except:
+        bot.reply_to(message, f"Đã xảy ra lỗi khi kiểm tra tài khoản")
+        
 bot.polling()
