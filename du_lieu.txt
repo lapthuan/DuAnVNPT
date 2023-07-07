@@ -33,3 +33,5 @@ Lập Thuận, daihostvlgdhhdhdhd, 2023-07-07 11:00:59, Không tìm thấy tài 
 Lập Thuận, daihostvlgdhhdhdhd, 2023-07-07 11:01:15, Không tìm thấy tài khoản này,Group: Test app
 Anh, daihostvlg, 2023-07-07 11:01:14, Mở cước thành công,Group: Test app
 Anh, daihostvlg, 2023-07-07 11:01:52, Tài khoản đã mở cước - Không thể thực hiện mở cước,Group: Test app
+Lập Thuận, daihostvlg, 2023-07-07 11:11:49, Tài khoản đã mở cước - Không thể thực hiện mở cước,Group: Test app
+Lập Thuận, daihostvlg, 2023-07-07 11:12:50, Mở cước thành công,Group: Test app

@@ -17,16 +17,18 @@ from bs4 import BeautifulSoup
 dotenv_path = Path('.env')
 load_dotenv(dotenv_path=dotenv_path)
 
-# Định nghĩa các URL cần sử dụng
-search_url = 'http://10.156.7.25/visa/package/customer.vnpt'
-login_url = 'http://10.156.7.25/visa/j_spring_login.vnpt'
-doOpenSuspend_url = 'http://10.156.7.25/visa/package/customer.vnpt?m=doOpenSuspend'
 
 # Lấy thông tin đăng nhập từ biến môi trường
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 USERNAME = os.getenv('VISA_USERNAME')
 PASSWORD = os.getenv('VISA_PASSWORD')
 bot = telebot.TeleBot(BOT_TOKEN)
+
+# Định nghĩa các URL cần sử dụng
+search_url = os.getenv('SEARCH_URL')
+login_url = os.getenv('LOGIN_URL')
+doOpenSuspend_url = os.getenv('DO_OPEN_SUSPEND_URL')
+detail_url = os.getenv('DETAIL_URL')
 
 # Khởi tạo một session HTTP sử dụng module requests
 session = requests.Session()
@@ -36,7 +38,6 @@ login_data = {
     'j_username': USERNAME,
     'j_password': PASSWORD
 }
-
 
 def login(username, user):
     try:
@@ -75,12 +76,11 @@ def login(username, user):
             checkAccount_ACTIVE = check_account_status(username)
             if checkAccount_ACTIVE == 'ACTIVE':
                 return ("Tài khoản đã mở cước - Không thể thực hiện mở cước")
-            
 
             href = first_a_tag['href']
             bean_id = re.search(r'bean\.id=(\d+)', href).group(1)
 
-            url_detail = f'http://10.156.7.25/visa/package/customer.vnpt?m=detail&bean.id={bean_id}'
+            url_detail = detail_url+bean_id
 
             response_search_detail = session.get(
                 url_detail, headers={'Cookie': cookies_str})
@@ -170,7 +170,6 @@ def check_account_status(username):
     except:
         return ('Lỗi')
 
-    
 
 @bot.message_handler(commands=['kt'])
 def check_account_command(message):
@@ -273,11 +272,12 @@ def login_command(message):
 def send_data_command(message):
     try:
         path_to_excel = 'du_lieu.xlsx'
-       
+
         with open(path_to_excel, 'rb') as file:
             bot.send_document(message.chat.id, file)
 
     except Exception as e:
         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
+
 
 bot.polling()
