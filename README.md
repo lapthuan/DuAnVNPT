@@ -2,13 +2,6 @@
 
 ## Thao Tác
 
-### Cài thư viện
-
-```shell
-pip install selenium
-pip install pyinstaller
-```
-
 ### Tạo file .env
 
 BOT_TOKEN = 
