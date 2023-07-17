@@ -4,6 +4,7 @@ import openpyxl
 import requests
 import re
 import telebot
+import sys
 from openpyxl.styles import Alignment, Font
 from openpyxl.utils import get_column_letter
 from dotenv import load_dotenv
@@ -12,7 +13,7 @@ from datetime import datetime
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from urllib.parse import urlencode
 from bs4 import BeautifulSoup
-
+from requests.exceptions import ConnectionError, ReadTimeout
 # Load các biến môi trường từ file .env
 dotenv_path = Path('.env')
 load_dotenv(dotenv_path=dotenv_path)
@@ -120,7 +121,7 @@ def login(username, user):
         else:
             return ('Không tìm thấy tài khoản này')
     except:
-        return ('Lỗi')
+        return ('Lỗi kết nối hãy thử lại')
 
 
 def check_account_status(username):
@@ -166,18 +167,17 @@ def check_account_status(username):
                 return "SUSPEND"
         else:
             return ('Không tìm thấy tài khoản này')
-
     except:
-        return ('Lỗi')
+        return ('Lỗi kết nối hãy thử lại')
 
 
 @bot.message_handler(commands=['kt'])
 def check_account_command(message):
     try:
         username = message.text.replace('/kt', '').strip()
-        bot.reply_to(message, f"Đang thực hiện kiểm tra tài khoản: {username}")
+        bot.reply_to(message, f"Đang thực hiện kiểm tra tài khoản : {username}")
         user = message.from_user.full_name
-
+        print("bot")
         if USERNAME and PASSWORD:
             status = check_account_status(username)
             bot.reply_to(message, status)
@@ -280,4 +280,10 @@ def send_data_command(message):
         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
 
 
-bot.polling()
+try:
+    bot.infinity_polling(timeout=10, long_polling_timeout=5)
+except (ConnectionError, ReadTimeout) as e:
+    sys.stdout.flush()
+    os.execv(sys.argv[0], sys.argv)
+else:
+    bot.infinity_polling(timeout=10, long_polling_timeout=5)
