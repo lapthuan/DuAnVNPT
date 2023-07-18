@@ -185,6 +185,16 @@ def check_account_command(message):
         bot.reply_to(message, f"Đã xảy ra lỗi khi kiểm tra tài khoản")
 
 
+@bot.message_handler(commands=['help'])
+def help_command(message):
+    try:
+        key_string = """/mc Tên-tài-khoản : Mở cước
+/kt Tên-tài-khoản : Kiểm tra cước
+/dulieu : Xem nhật ký"""
+        bot.reply_to(message, key_string)
+    except Exception as e:
+        bot.reply_to(message, "Mất kết nối")
+
 @bot.message_handler(commands=['mc'])
 def login_command(message):
     try:
@@ -278,6 +288,7 @@ def send_data_command(message):
 
     except Exception as e:
         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
+
 
 
 try:
