@@ -5,6 +5,7 @@ import requests
 import re
 import telebot
 import sys
+import paramiko
 from openpyxl.styles import Alignment, Font
 from openpyxl.utils import get_column_letter
 from dotenv import load_dotenv
@@ -24,6 +25,12 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 USERNAME = os.getenv('VISA_USERNAME')
 PASSWORD = os.getenv('VISA_PASSWORD')
 bot = telebot.TeleBot(BOT_TOKEN)
+
+# Lấy thông tin đăng nhập bras
+hostname_bras = os.getenv('HOSTNAME')
+hostname_bras_pre = os.getenv('HOSTNAME_PRE')
+user_bras = os.getenv('USER')
+password_bras = os.getenv('PASSWORD')
 
 # Định nghĩa các URL cần sử dụng
 search_url = os.getenv('SEARCH_URL')
@@ -170,6 +177,63 @@ def check_account_status(username):
     except:
         return ('Lỗi kết nối hãy thử lại')
 
+# khóa cước bras
+def blockUser(userblock):
+    try:
+        session = paramiko.SSHClient()
+        session.load_system_host_keys()
+        session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        session.connect(hostname_bras, username=user_bras, password=password_bras)
+
+        cmd = f"clear network-access aaa subscriber username {userblock}"
+        exit_cmd = f"exit"
+
+        stdin, stdout, stderr = session.exec_command(cmd)
+        time.sleep(0.5)
+        output = stdout.read().decode('utf-8').strip()
+        print("output session: " + output)
+
+        if output.strip() == "Subscriber entry not found.":
+            session.exec_command(exit_cmd)
+            time.sleep(0.5)
+            session.close()
+            session_pre = paramiko.SSHClient()
+            session_pre.load_system_host_keys()
+            session_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            session_pre.connect(hostname_bras_pre, username=user_bras, password=password_bras)
+            stdin, stdout, stderr = session_pre.exec_command(cmd)
+            time.sleep(0.5)
+            output = stdout.read().decode('utf-8')
+            print("10.91.9.250: " + output)
+
+            if output.strip() == "Subscriber entry not found.":
+                session_pre.exec_command(exit_cmd)
+                time.sleep(0.5)
+                session_pre.close()
+                return "10.91.9.250: " + output
+            elif output == "":
+                session_pre.exec_command(exit_cmd)
+                time.sleep(0.5)
+                session_pre.close()
+                return "Khóa cước thành công!"
+            else:
+                session_pre.exec_command(exit_cmd)
+                time.sleep(0.5)
+                session_pre.close()
+                return output
+        elif output == "":
+            session.exec_command(exit_cmd)
+            time.sleep(0.5)
+            session.close()
+            return "Khóa cước thành công!"
+        else:
+            session.exec_command(exit_cmd)
+            time.sleep(0.5)
+            session.close()
+            return "10.91.9.249: " + output
+    except Exception as err:
+        print(str(err))
+        return "Fail"
 
 @bot.message_handler(commands=['kt'])
 def check_account_command(message):
@@ -189,6 +253,7 @@ def check_account_command(message):
 def help_command(message):
     try:
         key_string = """/mc Tên-tài-khoản : Mở cước
+/kc Tên-tài-khoản : khóa cước tài khoản bras
 /kt Tên-tài-khoản : Kiểm tra cước
 /dulieu : Xem nhật ký"""
         bot.reply_to(message, key_string)
@@ -289,6 +354,19 @@ def send_data_command(message):
     except Exception as e:
         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
 
+@bot.message_handler(commands=['kc'])
+def send_data_command(message):
+    try:
+        userblock = message.text.replace('/kc', '').strip()
+        bot.reply_to(
+            message, f"Đang thực hiện khóa cước tài khoản : {userblock}")
+
+        # Gọi hàm blockUser để xử lý từng lệnh
+        status = blockUser(userblock)
+        bot.reply_to(message, status)
+
+    except Exception as e:
+        bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
 
 
 try:
