@@ -188,9 +188,8 @@ def check_account_command(message):
 @bot.message_handler(commands=['help'])
 def help_command(message):
     try:
-        key_string = """/mc Tên-tài-khoản : Mở cước
-/kt Tên-tài-khoản : Kiểm tra cước
-/dulieu : Xem nhật ký"""
+        key_string = """/mc Tên-tài-khoản: Mở cước
+/kt Tên-tài-khoản: Kiểm tra cước"""
         bot.reply_to(message, key_string)
     except Exception as e:
         bot.reply_to(message, "Mất kết nối")
@@ -278,16 +277,16 @@ def login_command(message):
         bot.reply_to(message, f"Đã xảy ra lỗi khi ghi dữ liệu vào log")
 
 
-@bot.message_handler(commands=['dulieu'])
-def send_data_command(message):
-    try:
-        path_to_excel = 'du_lieu.xlsx'
+# @bot.message_handler(commands=['dulieu'])
+# def send_data_command(message):
+#     try:
+#         path_to_excel = 'du_lieu.xlsx'
 
-        with open(path_to_excel, 'rb') as file:
-            bot.send_document(message.chat.id, file)
+#         with open(path_to_excel, 'rb') as file:
+#             bot.send_document(message.chat.id, file)
 
-    except Exception as e:
-        bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
+#     except Exception as e:
+#         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
 
 
 
