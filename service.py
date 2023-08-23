@@ -252,15 +252,10 @@ def check_account_command(message):
 @bot.message_handler(commands=['help'])
 def help_command(message):
     try:
-<<<<<<< HEAD
-        key_string = """/mc Tên-tài-khoản: Mở cước
-/kt Tên-tài-khoản: Kiểm tra cước"""
-=======
         key_string = """/mc Tên-tài-khoản : Mở cước
 /kc Tên-tài-khoản : khóa cước tài khoản bras
 /kt Tên-tài-khoản : Kiểm tra cước
 /dulieu : Xem nhật ký"""
->>>>>>> new
         bot.reply_to(message, key_string)
     except Exception as e:
         bot.reply_to(message, "Mất kết nối")
