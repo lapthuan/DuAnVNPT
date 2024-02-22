@@ -253,7 +253,7 @@ def check_account_command(message):
 def help_command(message):
     try:
         key_string = """/mc Tên-tài-khoản : Mở cước
-/kc Tên-tài-khoản : khóa cước tài khoản bras
+/clbras Tên-tài-khoản : clear xac thuc user net tren bras
 /kt Tên-tài-khoản : Kiểm tra cước
 /dulieu : Xem nhật ký"""
         bot.reply_to(message, key_string)
@@ -354,12 +354,12 @@ def login_command(message):
 #     except Exception as e:
 #         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
 
-@bot.message_handler(commands=['kc'])
+@bot.message_handler(commands=['clbras'])
 def send_data_command(message):
     try:
-        userblock = message.text.replace('/kc', '').strip()
+        userblock = message.text.replace('/clbras', '').strip()
         bot.reply_to(
-            message, f"Đang thực hiện khóa cước tài khoản : {userblock}")
+            message, f"Đang thực hiện clear xac thuc : {userblock}")
 
         # Gọi hàm blockUser để xử lý từng lệnh
         status = blockUser(userblock)
