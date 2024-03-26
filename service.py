@@ -215,7 +215,7 @@ def blockUser(userblock):
                 session_pre.exec_command(exit_cmd)
                 time.sleep(0.5)
                 session_pre.close()
-                return "Khóa cước thành công!"
+                return "Clear xac thuc thành công!"
             else:
                 session_pre.exec_command(exit_cmd)
                 time.sleep(0.5)
@@ -225,7 +225,7 @@ def blockUser(userblock):
             session.exec_command(exit_cmd)
             time.sleep(0.5)
             session.close()
-            return "Khóa cước thành công!"
+            return "Clear xac Thuc thành công!"
         else:
             session.exec_command(exit_cmd)
             time.sleep(0.5)
