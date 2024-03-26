@@ -176,7 +176,89 @@ def check_account_status(username):
             return ('Không tìm thấy tài khoản này')
     except:
         return ('Lỗi kết nối hãy thử lại')
+    
+#kiểm tra bras
+def checkBras(userBras):
+    try:
+        session = paramiko.SSHClient()
+        session.load_system_host_keys()
+        session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        session.connect(hostname_bras, username=user_bras, password=password_bras)
+        
+        # Tạo lệnh kiểm tra
+        cmd = f"show subscribers user-name {userBras} detail"
+        exit_cmd = f"exit"
 
+        # Nhận kết quả trả về từ cmd
+        stdin, stdout, stderr = session.exec_command(cmd)
+        time.sleep(0.5)
+        output = stdout.read().decode('utf-8').strip()
+        print("output session: " + output)
+        
+        #Kiểm tra kết quả trả về của bras 1
+        if output.strip() == "Total subscribers: 0, Active Subscribers: 0":
+            #Thoát khỏi session bras 1
+            session.exec_command(exit_cmd)
+            time.sleep(0.5)
+            session.close()
+
+            #Thực hiện kiểm tra trên bras 2
+            session_pre = paramiko.SSHClient()
+            session_pre.load_system_host_keys()
+            session_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            session_pre.connect(hostname_bras_pre, username=user_bras, password=password_bras)
+
+            stdin, stdout, stderr = session_pre.exec_command(cmd)
+            time.sleep(0.5)
+            output = stdout.read().decode('utf-8')
+
+            #Kiểm tra trên bras 2
+            if output.strip() == "Total subscribers: 0, Active Subscribers: 0":
+                session_pre.exec_command(exit_cmd)
+                time.sleep(0.5)
+                session_pre.close()
+                return f"Không tìm thấy tài khoản {userBras}"
+
+            else:
+                # Tách kết quả thành các dòng
+                output_lines = output.split('\n')
+                
+                # Lọc các dòng chứa thông tin cần thiết
+                relevant_lines = [line.strip() for line in output_lines if any(keyword in line for keyword in ['User Name:', 'IP Address:', 'IP Netmask:', 'Primary DNS Address:', 'Secondary DNS Address:', 'Login Time:'])]
+                
+                #Tách lấy 2 dòng chứa dns
+                # dns_address = [line.split(': ')[1].strip() for line in relevant_lines if line.startswith('Primary DNS Address') or line.startswith('Secondary DNS Address')]
+                #Kiểm tra dns
+                # if '123.26.26.26' not in dns_address or '123.23.23.23' not in dns_address:
+                #     return f"Tài khoản {userBras} còn khóa cước Bras"
+                
+                # Gửi lại các dòng đã lọc cho người dùng
+                session_pre.exec_command(exit_cmd)
+                time.sleep(0.5)
+                session_pre.close()
+                return '\n'.join(relevant_lines)
+        else:
+             # Tách kết quả thành các dòng
+                output_lines = output.split('\n')
+                
+                # Lọc các dòng chứa thông tin cần thiết
+                relevant_lines = [line.strip() for line in output_lines if any(keyword in line for keyword in ['User Name:', 'IP Address:', 'IP Netmask:', 'Primary DNS Address:', 'Secondary DNS Address:', 'Login Time:'])]
+                
+                #Tách lấy 2 dòng chứa dns
+                # dns_address = [line.split(': ')[1].strip() for line in relevant_lines if line.startswith('Primary DNS Address') or line.startswith('Secondary DNS Address')]
+                #Kiểm tra dns
+                # if '123.26.26.26' not in dns_address or '123.23.23.23' not in dns_address:
+                #     return f"Tài khoản {userBras} còn khóa cước Bras"
+                
+                # Gửi lại các dòng đã lọc cho người dùng
+                session.exec_command(exit_cmd)
+                time.sleep(0.5)
+                session.close()
+                return '\n'.join(relevant_lines)
+    except Exception as err:
+        print(str(err))
+        return "Fail"
+    
 # khóa cước bras
 def blockUser(userblock):
     try:
@@ -215,7 +297,7 @@ def blockUser(userblock):
                 session_pre.exec_command(exit_cmd)
                 time.sleep(0.5)
                 session_pre.close()
-                return "Clear xac thuc thành công!"
+                return "Clear xác thực thành công!"
             else:
                 session_pre.exec_command(exit_cmd)
                 time.sleep(0.5)
@@ -225,7 +307,7 @@ def blockUser(userblock):
             session.exec_command(exit_cmd)
             time.sleep(0.5)
             session.close()
-            return "Clear xac Thuc thành công!"
+            return "Clear xác thực thành công!"
         else:
             session.exec_command(exit_cmd)
             time.sleep(0.5)
@@ -253,8 +335,9 @@ def check_account_command(message):
 def help_command(message):
     try:
         key_string = """/mc Tên-tài-khoản : Mở cước
-/clbras Tên-tài-khoản : clear xac thuc user net tren bras
+/clbras Tên-tài-khoản : Clear xác thực user net trên bras
 /kt Tên-tài-khoản : Kiểm tra cước
+/ktbras Tên-tài-khoản: Kiểm tra user bras
 /dulieu : Xem nhật ký"""
         bot.reply_to(message, key_string)
     except Exception as e:
@@ -359,7 +442,7 @@ def send_data_command(message):
     try:
         userblock = message.text.replace('/clbras', '').strip()
         bot.reply_to(
-            message, f"Đang thực hiện clear xac thuc : {userblock}")
+            message, f"Đang thực hiện clear xác thực: {userblock}")
 
         # Gọi hàm blockUser để xử lý từng lệnh
         status = blockUser(userblock)
@@ -368,7 +451,22 @@ def send_data_command(message):
     except Exception as e:
         bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
 
+#Kiểm tra bras telegram
+@bot.message_handler(commands=['ktbras'])
+def send_data_command(message):
+    try:
+        userblock = message.text.replace('/ktbras', '').strip()
+        bot.reply_to(
+            message, f"Đang thực hiện kiểm tra: {userblock}")
 
+        # Gọi hàm blockUser để xử lý từng lệnh
+        status = checkBras(userblock)
+        bot.reply_to(message, status)
+
+    except Exception as e:
+        bot.reply_to(message, f"Có lỗi xảy ra: {str(e)}")
+        
+        
 try:
     bot.infinity_polling(timeout=10, long_polling_timeout=5)
 except (ConnectionError, ReadTimeout) as e:
