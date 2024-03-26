@@ -12,7 +12,11 @@ stdout_logfile=/home/hostvlg/DuAnVNPT/auto_visa_output.txt
 redirect_stderr=true
 
 sudo supervisorctl
+
 reread
+
 add auto_visa
+
 restart auto_visa
+
 status
