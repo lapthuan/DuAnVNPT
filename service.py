@@ -28,7 +28,6 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 # Lấy thông tin đăng nhập bras
 hostname_bras = os.getenv('HOSTNAME')
-hostname_bras_pre = os.getenv('HOSTNAME_PRE')
 user_bras = os.getenv('USER')
 password_bras = os.getenv('PASSWORD')
 
@@ -201,30 +200,31 @@ def checkBras(userBras):
             session.exec_command(exit_cmd)
             time.sleep(0.5)
             session.close()
-
+            return f"Không tìm thấy tài khoản {userBras}"
+        
             #Thực hiện kiểm tra trên bras 2
-            session_pre = paramiko.SSHClient()
-            session_pre.load_system_host_keys()
-            session_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            session_pre.connect(hostname_bras_pre, username=user_bras, password=password_bras)
+            # session_pre = paramiko.SSHClient()
+            # session_pre.load_system_host_keys()
+            # session_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            # session_pre.connect(hostname_bras_pre, username=user_bras, password=password_bras)
 
-            stdin, stdout, stderr = session_pre.exec_command(cmd)
-            time.sleep(0.5)
-            output = stdout.read().decode('utf-8')
+            # stdin, stdout, stderr = session_pre.exec_command(cmd)
+            # time.sleep(0.5)
+            # output = stdout.read().decode('utf-8')
 
             #Kiểm tra trên bras 2
-            if output.strip() == "Total subscribers: 0, Active Subscribers: 0":
-                session_pre.exec_command(exit_cmd)
-                time.sleep(0.5)
-                session_pre.close()
-                return f"Không tìm thấy tài khoản {userBras}"
+            # if output.strip() == "Total subscribers: 0, Active Subscribers: 0":
+            #     session_pre.exec_command(exit_cmd)
+            #     time.sleep(0.5)
+            #     session_pre.close()
+            #     return f"Không tìm thấy tài khoản {userBras}"
 
-            else:
+            #else:
                 # Tách kết quả thành các dòng
-                output_lines = output.split('\n')
+                #output_lines = output.split('\n')
                 
                 # Lọc các dòng chứa thông tin cần thiết
-                relevant_lines = [line.strip() for line in output_lines if any(keyword in line for keyword in ['User Name:', 'IP Address:', 'IP Netmask:', 'Primary DNS Address:', 'Secondary DNS Address:', 'Login Time:'])]
+                #relevant_lines = [line.strip() for line in output_lines if any(keyword in line for keyword in ['User Name:', 'IP Address:', 'IP Netmask:', 'Primary DNS Address:', 'Secondary DNS Address:', 'Login Time:'])]
                 
                 #Tách lấy 2 dòng chứa dns
                 # dns_address = [line.split(': ')[1].strip() for line in relevant_lines if line.startswith('Primary DNS Address') or line.startswith('Secondary DNS Address')]
@@ -233,10 +233,10 @@ def checkBras(userBras):
                 #     return f"Tài khoản {userBras} còn khóa cước Bras"
                 
                 # Gửi lại các dòng đã lọc cho người dùng
-                session_pre.exec_command(exit_cmd)
-                time.sleep(0.5)
-                session_pre.close()
-                return '\n'.join(relevant_lines)
+                # session_pre.exec_command(exit_cmd)
+                # time.sleep(0.5)
+                # session_pre.close()
+                # return '\n'.join(relevant_lines)
         else:
              # Tách kết quả thành các dòng
                 output_lines = output.split('\n')
@@ -279,30 +279,32 @@ def blockUser(userblock):
             session.exec_command(exit_cmd)
             time.sleep(0.5)
             session.close()
-            session_pre = paramiko.SSHClient()
-            session_pre.load_system_host_keys()
-            session_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            session_pre.connect(hostname_bras_pre, username=user_bras, password=password_bras)
-            stdin, stdout, stderr = session_pre.exec_command(cmd)
-            time.sleep(0.5)
-            output = stdout.read().decode('utf-8')
-            print("10.91.9.250: " + output)
+            return "Không tìm thấy tài khoản"
+            
+            # session_pre = paramiko.SSHClient()
+            # session_pre.load_system_host_keys()
+            # session_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            # session_pre.connect(hostname_bras_pre, username=user_bras, password=password_bras)
+            # stdin, stdout, stderr = session_pre.exec_command(cmd)
+            # time.sleep(0.5)
+            # output = stdout.read().decode('utf-8')
+            # print("10.91.9.250: " + output)
 
-            if output.strip() == "Subscriber entry not found.":
-                session_pre.exec_command(exit_cmd)
-                time.sleep(0.5)
-                session_pre.close()
-                return "10.91.9.250: " + output
-            elif output == "":
-                session_pre.exec_command(exit_cmd)
-                time.sleep(0.5)
-                session_pre.close()
-                return "Clear xác thực thành công!"
-            else:
-                session_pre.exec_command(exit_cmd)
-                time.sleep(0.5)
-                session_pre.close()
-                return output
+            # if output.strip() == "Subscriber entry not found.":
+            #     session_pre.exec_command(exit_cmd)
+            #     time.sleep(0.5)
+            #     session_pre.close()
+            #     return "10.91.9.250: " + output
+            # elif output == "":
+            #     session_pre.exec_command(exit_cmd)
+            #     time.sleep(0.5)
+            #     session_pre.close()
+            #     return "Clear xác thực thành công!"
+            # else:
+            #     session_pre.exec_command(exit_cmd)
+            #     time.sleep(0.5)
+            #     session_pre.close()
+            #     return output
         elif output == "":
             session.exec_command(exit_cmd)
             time.sleep(0.5)
