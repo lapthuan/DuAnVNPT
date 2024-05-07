@@ -150,3 +150,6 @@ Mai Thinh, kimhang0523.fb.vlg, 2024-03-26 13:20:40, Tài khoản đã mở cư�
 Mai Thinh, phuc0623fb.vlg, 2024-03-26 16:46:25, Mở cước thành công,Group: KhoaMoCuoc-TBH
 Mai Thinh, thuyan.fb.vlg, 2024-03-26 17:44:12, Mở cước thành công,Group: KhoaMoCuoc-TBH
 Mai Thinh, voliemfb.vlg, 2024-03-26 18:27:54, Mở cước thành công,Group: KhoaMoCuoc-TBH
+L T, daihostvlg, 2024-05-07 18:18:52, Tài khoản đã mở cước - Không thể thực hiện mở cước,Group: Test
+L T, daihostvlg , 2024-05-07 19:47:57, Tài khoản đã mở cước - Không thể thực hiện mở cước,Chat trực tiếp với Bot
+L T, daihostvlg, 2024-05-07 20:49:40, Tài khoản đã mở cước - Không thể thực hiện mở cước,Group: Test

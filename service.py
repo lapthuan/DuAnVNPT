@@ -16,7 +16,7 @@ from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, ReadTimeout
 # Load các biến môi trường từ file .env
-dotenv_path = Path('.env')
+dotenv_path = Path('C:\Tool\BotTelegram\.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 
