@@ -244,6 +244,8 @@ def checkBras(userBras):
 # khóa cước bras
 def blockUser(userblock):
     try:
+        if userblock == "":
+            return "Tài khoản rỗng"
         session = paramiko.SSHClient()
         session.load_system_host_keys()
         session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -256,7 +258,6 @@ def blockUser(userblock):
 
         ssh_channel.send(cmd)
 
-        # Đọc kết quả trả về từ lệnh "sho_sub_acc daihostvlg"
         output = ''
         while not output.endswith('~$ '):  # Đợi cho đến khi nhận được dấu nhắc lệnh trở lại
             output += ssh_channel.recv(1024).decode()
@@ -278,8 +279,7 @@ def blockUser(userblock):
             session.close()
             return "Không tìm thấy tài khoản"
         else:
-            session.exec_command(exit_cmd)
-            time.sleep(0.5)
+            ssh_channel.send(exit_cmd)
             session.close()
             return "Clear xác thực thành công!"
         
