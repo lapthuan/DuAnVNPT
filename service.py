@@ -179,82 +179,64 @@ def check_account_status(username):
 #kiểm tra bras
 def checkBras(userBras):
     try:
+        if userBras == "":
+            return "Tài khoản rỗng"
         session = paramiko.SSHClient()
         session.load_system_host_keys()
         session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         session.connect(hostname_bras, username=user_bras, password=password_bras)
-        
+      
         # Tạo lệnh kiểm tra
-        cmd = f"show subscribers user-name {userBras} detail"
-        exit_cmd = f"exit"
+        cmd = f"sho_sub_acc {userBras}\n"
+        exit_cmd = f"exit\n"
 
-        # Nhận kết quả trả về từ cmd
-        stdin, stdout, stderr = session.exec_command(cmd)
-        time.sleep(0.5)
-        output = stdout.read().decode('utf-8').strip()
-        print("output session: " + output)
+        # Mở một kênh SSH
+        ssh_channel = session.invoke_shell()
+        # Đợi để nhận kết quả
+        ssh_channel.send(cmd)
+         
+        output = ''
+        while not output.endswith('~$ '):  # Đợi cho đến khi nhận được dấu nhắc lệnh trở lại
+            output += ssh_channel.recv(1024).decode()
+
+        print("Output session:", output)
         
-        #Kiểm tra kết quả trả về của bras 1
-        if output.strip() == "Total subscribers: 0, Active Subscribers: 0":
-            #Thoát khỏi session bras 1
-            session.exec_command(exit_cmd)
-            time.sleep(0.5)
+            # Chia output thành các dòng
+        output_lines = output.split('\n')
+
+        # Kiểm tra từng dòng trong output
+        user_found = False
+        for line in output_lines:
+            if "User Name:" in line:
+                user_found = True
+                break
+
+        if user_found:
+            # Tách kết quả thành các dòng
+            output_lines = output.split('\n')
+                
+            # Lọc các dòng chứa thông tin cần thiết
+            relevant_lines = [line.strip() for line in output_lines if any(keyword in line for keyword in ['User Name:', 'IP Address:', 'IP Netmask:', 'Primary DNS Address:', 'Secondary DNS Address:', 'Login Time:'])]
+                
+                #Tách lấy 2 dòng chứa dns
+                # dns_address = [line.split(': ')[1].strip() for line in relevant_lines if line.startswith('Primary DNS Address') or line.startswith('Secondary DNS Address')]
+                #Kiểm tra dns
+                # if '123.26.26.26' not in dns_address or '123.23.23.23' not in dns_address:
+                #     return f"Tài khoản {userBras} còn khóa cước Bras"
+                
+                # Gửi lại các dòng đã lọc cho người dùng
+            ssh_channel.send(exit_cmd)
+          
+            session.close()
+            return '\n'.join(relevant_lines)
+        else:
+             #Thoát khỏi session bras 
+            ssh_channel.send(exit_cmd)
             session.close()
             return f"Không tìm thấy tài khoản {userBras}"
+
         
-            #Thực hiện kiểm tra trên bras 2
-            # session_pre = paramiko.SSHClient()
-            # session_pre.load_system_host_keys()
-            # session_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            # session_pre.connect(hostname_bras_pre, username=user_bras, password=password_bras)
-
-            # stdin, stdout, stderr = session_pre.exec_command(cmd)
-            # time.sleep(0.5)
-            # output = stdout.read().decode('utf-8')
-
-            #Kiểm tra trên bras 2
-            # if output.strip() == "Total subscribers: 0, Active Subscribers: 0":
-            #     session_pre.exec_command(exit_cmd)
-            #     time.sleep(0.5)
-            #     session_pre.close()
-            #     return f"Không tìm thấy tài khoản {userBras}"
-
-            #else:
-                # Tách kết quả thành các dòng
-                #output_lines = output.split('\n')
-                
-                # Lọc các dòng chứa thông tin cần thiết
-                #relevant_lines = [line.strip() for line in output_lines if any(keyword in line for keyword in ['User Name:', 'IP Address:', 'IP Netmask:', 'Primary DNS Address:', 'Secondary DNS Address:', 'Login Time:'])]
-                
-                #Tách lấy 2 dòng chứa dns
-                # dns_address = [line.split(': ')[1].strip() for line in relevant_lines if line.startswith('Primary DNS Address') or line.startswith('Secondary DNS Address')]
-                #Kiểm tra dns
-                # if '123.26.26.26' not in dns_address or '123.23.23.23' not in dns_address:
-                #     return f"Tài khoản {userBras} còn khóa cước Bras"
-                
-                # Gửi lại các dòng đã lọc cho người dùng
-                # session_pre.exec_command(exit_cmd)
-                # time.sleep(0.5)
-                # session_pre.close()
-                # return '\n'.join(relevant_lines)
-        else:
-             # Tách kết quả thành các dòng
-                output_lines = output.split('\n')
-                
-                # Lọc các dòng chứa thông tin cần thiết
-                relevant_lines = [line.strip() for line in output_lines if any(keyword in line for keyword in ['User Name:', 'IP Address:', 'IP Netmask:', 'Primary DNS Address:', 'Secondary DNS Address:', 'Login Time:'])]
-                
-                #Tách lấy 2 dòng chứa dns
-                # dns_address = [line.split(': ')[1].strip() for line in relevant_lines if line.startswith('Primary DNS Address') or line.startswith('Secondary DNS Address')]
-                #Kiểm tra dns
-                # if '123.26.26.26' not in dns_address or '123.23.23.23' not in dns_address:
-                #     return f"Tài khoản {userBras} còn khóa cước Bras"
-                
-                # Gửi lại các dòng đã lọc cho người dùng
-                session.exec_command(exit_cmd)
-                time.sleep(0.5)
-                session.close()
-                return '\n'.join(relevant_lines)
+           
     except Exception as err:
         print(str(err))
         return "Fail"
@@ -267,54 +249,40 @@ def blockUser(userblock):
         session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         session.connect(hostname_bras, username=user_bras, password=password_bras)
 
-        cmd = f"clear network-access aaa subscriber username {userblock}"
-        exit_cmd = f"exit"
+        cmd = f"clear_user {userblock}\n"
+        exit_cmd = f"exit\n"
+        # Mở một kênh SSH
+        ssh_channel = session.invoke_shell()
 
-        stdin, stdout, stderr = session.exec_command(cmd)
-        time.sleep(0.5)
-        output = stdout.read().decode('utf-8').strip()
-        print("output session: " + output)
+        ssh_channel.send(cmd)
 
-        if output.strip() == "Subscriber entry not found.":
-            session.exec_command(exit_cmd)
-            time.sleep(0.5)
+        # Đọc kết quả trả về từ lệnh "sho_sub_acc daihostvlg"
+        output = ''
+        while not output.endswith('~$ '):  # Đợi cho đến khi nhận được dấu nhắc lệnh trở lại
+            output += ssh_channel.recv(1024).decode()
+
+        # In kết quả
+        print(output)
+        # Chia output thành các dòng
+        output_lines = output.split('\n')
+
+        # Đếm số lần xuất hiện của "Subscriber entry not found."
+        not_found_count = 0
+        for line in output_lines:
+            if "Subscriber entry not found." in line:
+                not_found_count += 1
+
+        # Kiểm tra nếu số lần xuất hiện là 3 thì không tồn tại user
+        if not_found_count == 3:
+            ssh_channel.send(exit_cmd)
             session.close()
             return "Không tìm thấy tài khoản"
-            
-            # session_pre = paramiko.SSHClient()
-            # session_pre.load_system_host_keys()
-            # session_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            # session_pre.connect(hostname_bras_pre, username=user_bras, password=password_bras)
-            # stdin, stdout, stderr = session_pre.exec_command(cmd)
-            # time.sleep(0.5)
-            # output = stdout.read().decode('utf-8')
-            # print("10.91.9.250: " + output)
-
-            # if output.strip() == "Subscriber entry not found.":
-            #     session_pre.exec_command(exit_cmd)
-            #     time.sleep(0.5)
-            #     session_pre.close()
-            #     return "10.91.9.250: " + output
-            # elif output == "":
-            #     session_pre.exec_command(exit_cmd)
-            #     time.sleep(0.5)
-            #     session_pre.close()
-            #     return "Clear xác thực thành công!"
-            # else:
-            #     session_pre.exec_command(exit_cmd)
-            #     time.sleep(0.5)
-            #     session_pre.close()
-            #     return output
-        elif output == "":
-            session.exec_command(exit_cmd)
-            time.sleep(0.5)
-            session.close()
-            return "Clear xác thực thành công!"
         else:
             session.exec_command(exit_cmd)
             time.sleep(0.5)
             session.close()
-            return "10.91.9.249: " + output
+            return "Clear xác thực thành công!"
+        
     except Exception as err:
         print(str(err))
         return "Fail"
